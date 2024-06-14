@@ -4,7 +4,7 @@
 
 
 resource "aws_api_gateway_rest_api" "ipify" {
-  name = "IPIFY"
+  name        = "IPIFY"
   description = "IPIFY example"
 
   endpoint_configuration {
@@ -17,35 +17,35 @@ resource "aws_api_gateway_rest_api" "ipify" {
 
 
 resource "aws_api_gateway_method" "ipify_get" {
-  rest_api_id = aws_api_gateway_rest_api.ipify.id
-  http_method = "GET"
-  resource_id = aws_api_gateway_rest_api.ipify.root_resource_id 
+  rest_api_id   = aws_api_gateway_rest_api.ipify.id
+  http_method   = "GET"
+  resource_id   = aws_api_gateway_rest_api.ipify.root_resource_id
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_method_response" "ipify_get_response" {
   rest_api_id = aws_api_gateway_rest_api.ipify.id
-  resource_id = aws_api_gateway_rest_api.ipify.root_resource_id 
+  resource_id = aws_api_gateway_rest_api.ipify.root_resource_id
   status_code = 200
   http_method = aws_api_gateway_method.ipify_get.http_method
 }
 
 resource "aws_api_gateway_integration" "ipify_get_integration" {
-  rest_api_id = aws_api_gateway_rest_api.ipify.id
-  resource_id = aws_api_gateway_rest_api.ipify.root_resource_id 
-  type = "HTTP_PROXY"
-  uri = "https://api.ipify.org?format=$${stageVariables.format}"
+  rest_api_id             = aws_api_gateway_rest_api.ipify.id
+  resource_id             = aws_api_gateway_rest_api.ipify.root_resource_id
+  type                    = "HTTP_PROXY"
+  uri                     = "https://api.ipify.org?format=$${stageVariables.format}"
   integration_http_method = aws_api_gateway_method.ipify_get.http_method
-  http_method = "GET"
+  http_method             = "GET"
 }
 
 resource "aws_api_gateway_integration_response" "ipify_get_integration_response" {
   rest_api_id = aws_api_gateway_rest_api.ipify.id
-  resource_id = aws_api_gateway_rest_api.ipify.root_resource_id 
+  resource_id = aws_api_gateway_rest_api.ipify.root_resource_id
   http_method = aws_api_gateway_method.ipify_get.http_method
-  status_code = aws_api_gateway_method_response.ipify_get_response.status_code 
+  status_code = aws_api_gateway_method_response.ipify_get_response.status_code
 
-  depends_on = [ aws_api_gateway_method.ipify_get, aws_api_gateway_integration.ipify_get_integration ]
+  depends_on = [aws_api_gateway_method.ipify_get, aws_api_gateway_integration.ipify_get_integration]
 }
 
 
@@ -57,7 +57,7 @@ resource "aws_api_gateway_deployment" "ipify_deployment" {
   triggers = {
     redeployment = sha1(jsonencode([
       aws_api_gateway_rest_api.ipify,
-      aws_api_gateway_method.ipify_get,  
+      aws_api_gateway_method.ipify_get,
       aws_api_gateway_integration.ipify_get_integration
     ]))
   }
@@ -68,9 +68,9 @@ resource "aws_api_gateway_deployment" "ipify_deployment" {
 }
 
 resource "aws_api_gateway_stage" "ipify_stage_json" {
-  rest_api_id = aws_api_gateway_rest_api.ipify.id
+  rest_api_id   = aws_api_gateway_rest_api.ipify.id
   deployment_id = aws_api_gateway_deployment.ipify_deployment.id
-  stage_name = "json"
+  stage_name    = "json"
 
   variables = {
     "format" = "json"
@@ -79,9 +79,9 @@ resource "aws_api_gateway_stage" "ipify_stage_json" {
 
 
 resource "aws_api_gateway_stage" "ipify_stage_plain" {
-  rest_api_id = aws_api_gateway_rest_api.ipify.id
+  rest_api_id   = aws_api_gateway_rest_api.ipify.id
   deployment_id = aws_api_gateway_deployment.ipify_deployment.id
-  stage_name = "plain"
+  stage_name    = "plain"
 
   variables = {
     "format" = "plain"
