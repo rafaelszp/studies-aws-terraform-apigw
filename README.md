@@ -23,5 +23,6 @@ aws get-rest-apis --region us-east-1
 
 http --verify=false $(terraform output -raw ipify_plain_url)  
 fish  -c  $(terraform output -raw country_test_cmd)/53.24.222.11 
-
+fish  -c  $(terraform output -raw json_test_cmd)/177.24.222.11
+fish  -c  $(terraform output -raw json_test_cmd)/192.172.222.11 
 ```
