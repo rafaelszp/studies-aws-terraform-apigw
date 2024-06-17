@@ -11,11 +11,15 @@ export const handler = async (event) => {
   /*global fetch*/
   console.log("fetching",IPIFY_URL)
   const ipget = await fetch(IPIFY_URL,headers);
-  const ip = {ip: await ipget.json()};
+  const ipInfo = {
+    ip: await ipget.json(),
+    "country": undefined
+  };
   
   const response = {
     statusCode: 200,
-    body: ip,
+    "isBase64Encoded": false,
+    body: JSON.stringify(ipInfo),
     headers: {"content-type": "application/json"} 
   };
   return response;

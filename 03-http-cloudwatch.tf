@@ -94,12 +94,6 @@ output "json_test_cmd" {
 ### CloudWatch log group
 
 resource "aws_cloudwatch_log_group" "ipapi_log_group" {
-  name              = "IPAPI-LOG-GROUP"
+  name              = "/aws/apigw/${aws_apigatewayv2_api.ipapi_gw.name}"
   retention_in_days = 1
 }
-
-resource "aws_cloudwatch_log_stream" "ipapi_log_stream" {
-  name           = "ipapi-log-stream"
-  log_group_name = aws_cloudwatch_log_group.ipapi_log_group.name
-}
-
