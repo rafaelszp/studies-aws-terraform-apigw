@@ -1,13 +1,16 @@
 const IPIFY_URL=process.env.IPIFY_URL
 
 export const handler = async (event) => {
-  // TODO implement
   
-
+  const clientIP = event.headers ? event.headers['x-forwarded-for']:undefined;
+  const headers = {}
+  if(clientIP){
+    headers["x-forwarded-for"] = clientIP
+  }
   
   /*global fetch*/
   console.log("fetching",IPIFY_URL)
-  const ipget = await fetch(IPIFY_URL);
+  const ipget = await fetch(IPIFY_URL,headers);
   const ip = {ip: await ipget.json()};
   
   const response = {
