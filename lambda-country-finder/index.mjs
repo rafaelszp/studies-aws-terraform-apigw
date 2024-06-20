@@ -11,6 +11,6 @@ export const handler = async (event) => {
   return {
     statusCode: 200,
     "isBase64Encoded": false,
-    body: JSON.stringify(country)
+    body: country
   }
 }

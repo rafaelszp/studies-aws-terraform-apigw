@@ -11,6 +11,29 @@ data "aws_iam_policy_document" "lambda_assume_role" {
   }
 }
 
+data "aws_iam_policy_document" "log_invoke_permission" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+      "logs:PutLogEvents",
+      "logs:GetLogEvents",
+      "logs:FilterLogEvents",
+    ]
+
+    resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = ["lambda:InvokeFunction"]
+    resources = ["${aws_lambda_function.lambda_country_finder.arn}"]
+  }
+}
+
 resource "aws_iam_role" "iam_lambda_role" {
   name = "iam_lambda_role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
@@ -18,7 +41,7 @@ resource "aws_iam_role" "iam_lambda_role" {
 
 resource "aws_iam_role_policy" "lambda_role_policy" {
   name = "iam_lambda_role_policy"
-  policy = data.aws_iam_policy_document.cloudwatch.json
+  policy = data.aws_iam_policy_document.log_invoke_permission.json
   role = aws_iam_role.iam_lambda_role.id
 }
 
@@ -29,11 +52,26 @@ data "archive_file" "lambda_api_checker_archive" {
   output_path = "${path.module}/out/lambda_ip_checker_payload.zip"
 }
 
+
+data "archive_file" "nodejs_ip_checker" {
+  type = "zip"
+  source_dir = "${path.module}/lambda-ip-checker/nodejs"
+  output_path = "${path.module}/out/lambda_ip_checker_layer.zip"
+}
+
+resource "aws_lambda_layer_version" "lambda_ip_checker_layer" {
+  layer_name = "nodejs"
+  filename = "${path.module}/out/lambda_ip_checker_layer.zip"
+  compatible_runtimes = ["nodejs20.x"]
+}
+
 resource "aws_lambda_function" "lambda_ip_checker" {
   filename = "out/lambda_ip_checker_payload.zip"
   function_name = "lambda_ip_checker"
   role = aws_iam_role.iam_lambda_role.arn
   handler = "index.handler"
+  layers = [aws_lambda_layer_version.lambda_ip_checker_layer.arn]
+  timeout = 10
 
   source_code_hash = data.archive_file.lambda_api_checker_archive.output_base64sha256
   
@@ -65,6 +103,7 @@ resource "aws_lambda_function" "lambda_country_finder" {
   function_name = "lambda_country_finder"
   role = aws_iam_role.iam_lambda_role.arn
   handler = "index.handler"
+  timeout = 5
 
   source_code_hash = data.archive_file.lambda_country_finder_archive.output_base64sha256
 

@@ -12,6 +12,12 @@ provider "aws" {
   region = "us-east-1" # Para este laboratório é necessário estar na região de N.Virginia (us-east-1)
 }
 
+data "aws_region" "current_region" {
+}
+
+data "aws_caller_identity" "current_caller_id" {
+}
+
 ### CRIACAO DA API GATEWAY ###
 resource "aws_api_gateway_rest_api" "minha-api-gw" {
   name        = "minha-api-gw"
@@ -88,4 +94,8 @@ output "minha-api-url" {
 }
 output "minha-dev-api-url" {
   value = aws_api_gateway_stage.DEV_STAGE.invoke_url
+}
+
+output "region" {
+  value = data.aws_region.current_region.name
 }
