@@ -2,16 +2,18 @@ import { InvokeCommand, LambdaClient, LogType } from "@aws-sdk/client-lambda";
 
 const IPIFY_URL=process.env.IPIFY_URL
 
-export const handler = async (event) => {
+export const handler = async (event,context) => {
   
-  const clientIP = event.headers ? event.headers['x-forwarded-for']:undefined;
+  const clientIP = event.headers ? event.headers['X-Forwarded-For']:undefined;
+  console.log(event)
   const headers = {}
   if(clientIP){
-    headers["x-forwarded-for"] = clientIP
+    headers["X-Forwarded-For"] = clientIP
+    console.log({"X-Forwarded-For": clientIP})
   }
   
   /*global fetch*/
-  console.log("fetching",IPIFY_URL)
+  console.log("fetching",IPIFY_URL,headers)
   const ipget = await fetch(IPIFY_URL,headers);
   const ip = await ipget.json();
 

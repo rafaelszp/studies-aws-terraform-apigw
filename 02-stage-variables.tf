@@ -37,6 +37,11 @@ resource "aws_api_gateway_integration" "ipify_get_integration" {
   uri                     = "https://api.ipify.org?format=$${stageVariables.format}"
   integration_http_method = aws_api_gateway_method.ipify_get.http_method
   http_method             = "GET"
+
+  # request_parameters = {
+  #   "integration.request.header.X-Forwarded-For" = "'method.request.header.X-Forwarded-For'"
+  # }
+
 }
 
 resource "aws_api_gateway_integration_response" "ipify_get_integration_response" {
