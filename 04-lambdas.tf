@@ -34,6 +34,10 @@ data "aws_iam_policy_document" "log_invoke_permission" {
   }
 }
 
+data "aws_iam_policy" "lambda_xray" {
+  name = "AWSXRayDaemonWriteAccess"
+}
+
 resource "aws_iam_role" "iam_lambda_role" {
   name = "iam_lambda_role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
@@ -43,6 +47,11 @@ resource "aws_iam_role_policy" "lambda_role_policy" {
   name = "iam_lambda_role_policy"
   policy = data.aws_iam_policy_document.log_invoke_permission.json
   role = aws_iam_role.iam_lambda_role.id
+}
+
+resource "aws_iam_role_policy_attachment" "xray_permission" {
+  role = aws_iam_role.iam_lambda_role.id
+  policy_arn = data.aws_iam_policy.lambda_xray.arn
 }
 
 ## LAMBDA IP CHECKER
@@ -72,6 +81,10 @@ resource "aws_lambda_function" "lambda_ip_checker" {
   handler = "index.handler"
   layers = [aws_lambda_layer_version.lambda_ip_checker_layer.arn]
   timeout = 10
+
+  tracing_config {
+    mode = "Active"  
+  }
 
   source_code_hash = data.archive_file.lambda_api_checker_archive.output_base64sha256
   
@@ -104,6 +117,10 @@ resource "aws_lambda_function" "lambda_country_finder" {
   role = aws_iam_role.iam_lambda_role.arn
   handler = "index.handler"
   timeout = 5
+
+  tracing_config {
+    mode = "Active"  
+  }
 
   source_code_hash = data.archive_file.lambda_country_finder_archive.output_base64sha256
 
