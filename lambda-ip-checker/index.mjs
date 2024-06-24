@@ -9,7 +9,9 @@ export const handler = async (event,context) => {
   const headers = {}
   if(clientIP){
     headers["X-Forwarded-For"] = clientIP
+    headers["x-client-ip"] = clientIP
     console.log({"X-Forwarded-For": clientIP})
+
   }
   
   /*global fetch*/
@@ -19,10 +21,11 @@ export const handler = async (event,context) => {
 
   console.log(ip)
 
-  const resp_country =  JSON.parse(await invokeCountry(ip.ip))
+  const resp_country =  JSON.parse(await invokeCountry(clientIP || ip.ip))
 
   const ipInfo = {
-    ip: ip.ip,
+    apiIP: ip.ip,
+    clientIP,
     "country": resp_country.body
   };
 
